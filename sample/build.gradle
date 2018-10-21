@@ -1,0 +1,23 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.faendir.serviceloader"
+        minSdkVersion 14
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+    }
+    sourceSets {
+        main {
+            assets.srcDirs += "build/generated/assets/serviceloader/release"
+        }
+    }
+}
+
+dependencies {
+    compileOnly project(':annotation')
+    implementation project(':serviceloader')
+    annotationProcessor project(':processor')
+}

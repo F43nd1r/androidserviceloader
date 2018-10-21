@@ -1,0 +1,8 @@
+apply plugin: 'java-library'
+
+dependencies {
+    compile project(path: ':annotation')
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
