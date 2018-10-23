@@ -2,7 +2,6 @@ package com.faendir.serviceloader;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import com.faendir.asl.serviceloader.ServiceLoader;
 
@@ -12,7 +11,7 @@ import com.faendir.asl.serviceloader.ServiceLoader;
  */
 public class MainActivity extends Activity {
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         for (InterfaceTest t : new ServiceLoader(this).load(InterfaceTest.class)) {
             Log.e("RESULT",t.getClass().getName());
