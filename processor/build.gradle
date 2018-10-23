@@ -1,7 +1,11 @@
-apply plugin: 'java-library'
+plugins {
+    id "java-library"
+    id "maven-publish"
+    id "com.jfrog.bintray" version "1.8.4"
+}
 
 dependencies {
-    compile project(path: ':annotation')
+    implementation project(':annotation')
 }
 
 sourceCompatibility = "8"

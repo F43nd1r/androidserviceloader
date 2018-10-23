@@ -1,24 +1,155 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
-    
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0'
-        
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'digital.wup:android-maven-publish:3.6.2'
+    }
+}
+plugins {
+    id "net.researchgate.release" version "2.7.0"
+}
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+def initPublication = { MavenPublication publication ->
+    publication.pom {
+        name = 'ASL'
+        description = 'Android ServiceLoader'
+        url = 'https://github.com/F43nd1r/androidserviceloader'
+        scm {
+            connection = 'scm:git:https://github.com/F43nd1r/androidserviceloader.git'
+            developerConnection = 'scm:git:git@github.com:F43nd1r/androidserviceloader.git'
+            url = 'https://github.com/F43nd1r/androidserviceloader.git'
+        }
+        licenses {
+            license {
+                name = 'Apache-2.0'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution = 'repo'
+            }
+        }
+        developers {
+            developer {
+                id = 'f43nd1r'
+                name = 'Lukas Morawietz'
+            }
+        }
     }
 }
 
-allprojects {
+release {
+    tagTemplate = '$name-$version'
+}
+
+task build {
+    subprojects.each {
+        beforeReleaseBuild.dependsOn "${it.path}:clean"
+        dependsOn "${it.path}:build"
+    }
+}
+
+subprojects {
     repositories {
         google()
         jcenter()
+    }
+    plugins.withType(com.android.build.gradle.BasePlugin) {
+        android {
+            compileSdkVersion Integer.parseInt(androidVersion)
+            defaultConfig {
+                minSdkVersion androidMinVersion
+                targetSdkVersion androidVersion
+                versionName version
+            }
+            buildTypes {
+                release {
+                    minifyEnabled false
+                }
+            }
+        }
+
+        task sourcesJar(type: Jar) {
+            from android.sourceSets.main.java.srcDirs
+            classifier = 'sources'
+        }
+
+        task javadoc(type: Javadoc) {
+            source = android.sourceSets.main.java.srcDirs + files("${project.buildDir}/generated/source/apt/release")
+            classpath += files(android.getBootClasspath().join(File.pathSeparator)) + files("${project.buildDir}/generated/source/r/release")
+            options.with {
+                linksOffline "http://d.android.com/reference", "${android.sdkDirectory.path}/docs/reference"
+            }
+        }
+
+        task javadocJar(type: Jar, dependsOn: javadoc) {
+            from javadoc
+            classifier = 'javadoc'
+        }
+
+        plugins.withType(digital.wup.android_maven_publish.AndroidMavenPublishPlugin) {
+            publishing {
+                publications {
+                    maven(MavenPublication) { MavenPublication publication ->
+                        from components.android
+                        artifact sourcesJar
+                        artifact javadocJar
+                        initPublication(publication)
+                    }
+                }
+            }
+        }
+        plugins.withType(JavaLibraryPlugin) {
+            task sourcesJar(type: Jar) {
+                from sourceSets.main.allSource
+                classifier = 'sources'
+            }
+
+            task javadocJar(type: Jar, dependsOn: javadoc) {
+                from javadoc
+                classifier = 'javadoc'
+            }
+
+            plugins.withType(MavenPublishPlugin) {
+                publishing {
+                    publications {
+                        maven(MavenPublication) { MavenPublication publication ->
+                            from components.java
+                            artifact sourcesJar
+                            artifact javadocJar
+                            initPublication(publication)
+                        }
+                    }
+                }
+            }
+            plugins.withType(BintrayPlugin) {
+                bintray {
+                    if (project.hasProperty('artifactoryUser')) {
+                        user = artifactoryUser
+                        key = artifactoryApiKey
+                    }
+                    publications = ['maven']
+                    publish = true
+                    pkg {
+                        repo = 'maven'
+                        afterEvaluate {
+                            org.gradle.api.publish.maven.MavenPom pom = publishing.publications.maven.pom
+                            name = pom.name.get()
+                            websiteUrl = pom.url.get()
+                            vcsUrl = pom.scm.url.get()
+                            licenses = pom.licenses.collect { l -> l.name.get() }
+                            desc = pom.description.get()
+                        }
+                        publicDownloadNumbers = true
+                        version {
+                            name = project.version
+                        }
+                    }
+                }
+                bintrayUpload.dependsOn(build, javadocJar, sourcesJar, 'generatePomFileForMavenPublication')
+                rootProject.afterReleaseBuild.dependsOn bintrayUpload
+            }
+        }
     }
 }
 

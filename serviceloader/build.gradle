@@ -1,24 +1,5 @@
-apply plugin: 'com.android.library'
-
-android {
-    compileSdkVersion 28
-
-    defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
-
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-
-}
-
-dependencies {
+plugins {
+    id "com.android.library"
+    id "digital.wup.android-maven-publish"
+    id "com.jfrog.bintray" version "1.8.4"
 }
