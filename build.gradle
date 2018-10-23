@@ -1,3 +1,4 @@
+import com.jfrog.bintray.gradle.BintrayPlugin
 buildscript {
     repositories {
         google()
@@ -6,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
         classpath 'digital.wup:android-maven-publish:3.6.2'
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4"
     }
 }
 plugins {
