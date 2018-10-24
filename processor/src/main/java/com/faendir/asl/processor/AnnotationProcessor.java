@@ -14,7 +14,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.AbstractAnnotationValueVisitor8;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.JavaFileObject;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -127,9 +128,9 @@ public class AnnotationProcessor extends AbstractProcessor {
     private File assetFolder() {
         try {
             Filer filer = processingEnv.getFiler();
-
-            JavaFileObject dummySourceFile = filer.createSourceFile("dummy" + System.currentTimeMillis());
-            String dummySourceFilePath = dummySourceFile.toUri().toString();
+            FileObject dummy = filer.createResource(StandardLocation.SOURCE_OUTPUT, "dummy", "dummy" + System.currentTimeMillis());
+            String dummySourceFilePath = dummy.toUri().toString();
+            dummy.delete();
 
             if (dummySourceFilePath.startsWith("file:")) {
                 if (!dummySourceFilePath.startsWith("file://")) {
