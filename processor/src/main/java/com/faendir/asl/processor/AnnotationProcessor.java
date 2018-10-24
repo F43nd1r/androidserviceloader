@@ -9,7 +9,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -23,16 +22,17 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class AnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(AutoService.class);
+        Set<TypeElement> elements = roundEnv.getElementsAnnotatedWith(AutoService.class).stream().filter(TypeElement.class::isInstance).map(TypeElement.class::cast).collect(Collectors.toSet());
         File assetFolder = assetFolder();
         TypeElement autoServiceType = processingEnv.getElementUtils().getTypeElement(AutoService.class.getName());
         ElementFilter.methodsIn(autoServiceType.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals("value")).findAny().ifPresent(valueMethod ->{
-        for (Element element : elements) {
+        for (TypeElement element : elements) {
             element.getAnnotationMirrors().stream().filter(mirror -> mirror.getAnnotationType().toString().equals(autoServiceType.toString())).findAny().ifPresent(mirror -> {
                 AnnotationValue value = mirror.getElementValues().get(valueMethod);
                 value.accept(new AbstractAnnotationValueVisitor8<Object, Object>() {
@@ -85,7 +85,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     public Object visitType(TypeMirror t, Object o) {
                         File directory = new File(assetFolder, t.toString());
                         directory.mkdirs();
-                        File file = new File(directory, processingEnv.getElementUtils().getPackageOf(element) + "." + element.getSimpleName().toString());
+                        File file = new File(directory, element.getQualifiedName().toString());
                         try {
                             file.createNewFile();
                         } catch (IOException e) {
