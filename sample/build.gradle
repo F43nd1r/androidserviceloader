@@ -1,13 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
+    def assetsDir = "${project.buildDir}/generated/assets/serviceloader/release" as String
     defaultConfig {
         applicationId "com.faendir.serviceloader"
         versionCode 1
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ['assetsDir': assetsDir]
+            }
+        }
     }
     sourceSets {
         main {
-            assets.srcDirs += "build/generated/assets/serviceloader/release"
+            assets.srcDirs += assetsDir
         }
     }
 }

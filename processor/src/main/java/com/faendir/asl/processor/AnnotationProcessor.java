@@ -27,96 +27,100 @@ import java.util.stream.Collectors;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class AnnotationProcessor extends AbstractProcessor {
+
+    public static final String ASSETS_DIR = "assetsDir";
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Set<TypeElement> elements = roundEnv.getElementsAnnotatedWith(AutoService.class).stream().filter(TypeElement.class::isInstance).map(TypeElement.class::cast).collect(Collectors.toSet());
-        File assetFolder = assetFolder();
-        TypeElement autoServiceType = processingEnv.getElementUtils().getTypeElement(AutoService.class.getName());
-        ElementFilter.methodsIn(autoServiceType.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals("value")).findAny().ifPresent(valueMethod ->{
-        for (TypeElement element : elements) {
-            element.getAnnotationMirrors().stream().filter(mirror -> mirror.getAnnotationType().toString().equals(autoServiceType.toString())).findAny().ifPresent(mirror -> {
-                AnnotationValue value = mirror.getElementValues().get(valueMethod);
-                value.accept(new AbstractAnnotationValueVisitor8<Object, Object>() {
-                    @Override
-                    public Object visitBoolean(boolean b, Object o) {
-                        return null;
-                    }
+        if (!elements.isEmpty()) {
+            File assetFolder = assetFolder();
+            TypeElement autoServiceType = processingEnv.getElementUtils().getTypeElement(AutoService.class.getName());
+            ElementFilter.methodsIn(autoServiceType.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals("value")).findAny().ifPresent(valueMethod -> {
+                for (TypeElement element : elements) {
+                    element.getAnnotationMirrors().stream().filter(mirror -> mirror.getAnnotationType().toString().equals(autoServiceType.toString())).findAny().ifPresent(mirror -> {
+                        AnnotationValue value = mirror.getElementValues().get(valueMethod);
+                        value.accept(new AbstractAnnotationValueVisitor8<Object, Object>() {
+                            @Override
+                            public Object visitBoolean(boolean b, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitByte(byte b, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitByte(byte b, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitChar(char c, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitChar(char c, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitDouble(double d, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitDouble(double d, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitFloat(float f, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitFloat(float f, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitInt(int i, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitInt(int i, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitLong(long i, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitLong(long i, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitShort(short s, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitShort(short s, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitString(String s, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitString(String s, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitType(TypeMirror t, Object o) {
-                        File directory = new File(assetFolder, t.toString());
-                        directory.mkdirs();
-                        File file = new File(directory, element.getQualifiedName().toString());
-                        try {
-                            file.createNewFile();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
+                            @Override
+                            public Object visitType(TypeMirror t, Object o) {
+                                File directory = new File(assetFolder, t.toString());
+                                directory.mkdirs();
+                                File file = new File(directory, element.getQualifiedName().toString());
+                                try {
+                                    file.createNewFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitEnumConstant(VariableElement c, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitEnumConstant(VariableElement c, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitAnnotation(AnnotationMirror a, Object o) {
-                        return null;
-                    }
+                            @Override
+                            public Object visitAnnotation(AnnotationMirror a, Object o) {
+                                return null;
+                            }
 
-                    @Override
-                    public Object visitArray(List<? extends AnnotationValue> vals, Object o) {
-                        for (AnnotationValue v : vals) {
-                            v.accept(this, null);
-                        }
-                        return null;
-                    }
-                }, null);
+                            @Override
+                            public Object visitArray(List<? extends AnnotationValue> vals, Object o) {
+                                for (AnnotationValue v : vals) {
+                                    v.accept(this, null);
+                                }
+                                return null;
+                            }
+                        }, null);
+                    });
+                }
             });
         }
-
-        });
         return false;
     }
 
@@ -126,6 +130,9 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private File assetFolder() {
+        if (processingEnv.getOptions().containsKey(ASSETS_DIR)) {
+            return new File(processingEnv.getOptions().get(ASSETS_DIR));
+        }
         try {
             Filer filer = processingEnv.getFiler();
             FileObject dummy = filer.createResource(StandardLocation.SOURCE_OUTPUT, "dummy", "dummy" + System.currentTimeMillis());

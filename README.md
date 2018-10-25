@@ -5,9 +5,17 @@ Assets based implementation of ServiceLoader
 build.gradle: 
 ```groovy
 android {
+    def assetsDir = "${project.buildDir}/generated/assets/serviceloader/release" as String
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ['assetsDir': assetsDir]
+            }
+        }
+    }
     sourceSets {
         main {
-            assets.srcDirs += "build/generated/assets/serviceloader/release"
+            assets.srcDirs += assetsDir
         }
     }
     ...
@@ -20,6 +28,11 @@ dependencies {
 }
 ```
 Then anywhere in code:
+```java
+@AutoService(MyInterface.class)
+public class MyClass implements MyInterface {
+}
+```
 ```java
 List<MyInterface> implementations = new ServiceLoader(context).load(MyInterface.class);
 ```
