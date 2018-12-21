@@ -1,1 +1,5 @@
-<manifest package="com.faendir.asl.serviceloader"/>
+<manifest package="com.faendir.asl.serviceloader" xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <meta-data android:name="com.faendir.asl.serviceloader:${applicationId}" android:value="${applicationId}.asl.Definition"/>
+    </application>
+</manifest>

@@ -6,6 +6,8 @@ plugins {
 
 dependencies {
     implementation project(':annotation')
+    compile 'com.squareup:javapoet:1.11.1'
+    compile 'org.androidannotations:androidannotations:4.5.2'
 }
 
 sourceCompatibility = "8"
