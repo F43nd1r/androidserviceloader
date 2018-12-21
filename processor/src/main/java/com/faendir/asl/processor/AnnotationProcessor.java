@@ -26,7 +26,6 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.AbstractAnnotationValueVisitor8;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.File;
@@ -160,8 +159,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                         .skipJavaLangImports(true)
                         .build().writeTo(processingEnv.getFiler());
             } catch (Exception e) {
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
         return false;
